@@ -1,0 +1,88 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  _R_CHECK_FORCE_SUGGESTS_: "false"
+
+jobs:
+  ci:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {os: ubuntu-latest, backend: RAPT}
+          - {os: macos-latest,  backend: ''}
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install libjansson (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update -qq && sudo apt-get install -y --no-install-recommends libjansson-dev
+
+      - name: Install jansson (macOS)
+        if: runner.os == 'macOS'
+        run: brew install jansson
+
+      - name: Setup r-ci
+        uses: eddelbuettel/github-actions/r-ci@master
+        with:
+          backend: ${{ matrix.backend }}
+
+      - name: Dependencies
+        run: ./run.sh install_all
+
+      - name: Assert runtime jansson matches compile-time
+        run: |
+          R CMD INSTALL .
+          Rscript -e 'v <- janssonr:::jansson_version(); print(v); stopifnot(identical(v[["compiled"]], v[["runtime"]]))'
+
+      - name: Test
+        run: ./run.sh run_tests
+
+  # Prove the declared jansson >= 2.11 floor with the real 2.11 library:
+  # mapping and ownership behavior, not just symbol existence.
+  floor:
+    runs-on: ubuntu-latest
+    env:
+      _R_CHECK_FORCE_SUGGESTS_: "false"
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Build jansson 2.11 from source
+        run: |
+          curl -sSL -o jansson-2.11.tar.gz https://github.com/akheron/jansson/releases/download/v2.11/jansson-2.11.tar.gz
+          tar xf jansson-2.11.tar.gz
+          cd jansson-2.11
+          ./configure --prefix="$HOME/jansson211"
+          make -j2
+          make install
+
+      - name: Setup r-ci
+        uses: eddelbuettel/github-actions/r-ci@master
+        with:
+          backend: RAPT
+
+      - name: Dependencies
+        run: ./run.sh install_all
+
+      - name: Install against 2.11 and assert linkage
+        run: |
+          export PKG_CONFIG_PATH="$HOME/jansson211/lib/pkgconfig"
+          export LD_LIBRARY_PATH="$HOME/jansson211/lib"
+          R CMD INSTALL .
+          SO=$(Rscript -e 'cat(system.file("libs", "janssonr.so", package = "janssonr"))')
+          ldd "$SO" | tee ldd.out
+          grep -q "$HOME/jansson211/lib/libjansson" ldd.out
+          # headers were 2.11 (below 2.13.1), so the runtime probe must be NA
+          Rscript -e 'v <- janssonr:::jansson_version(); print(v); stopifnot(v[["compiled"]] == "2.11", is.na(v[["runtime"]]))'
+
+      - name: Test against 2.11
+        run: |
+          export LD_LIBRARY_PATH="$HOME/jansson211/lib"
+          Rscript -e 'exit <- tinytest::test_package("janssonr", at_home = TRUE); if (any(!sapply(exit, isTRUE))) stop("test failures")'

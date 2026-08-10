@@ -1,0 +1,7 @@
+src/*.o
+src/*.so
+src/Makevars
+tasks/
+..Rcheck/
+*.Rcheck/
+*.tar.gz
