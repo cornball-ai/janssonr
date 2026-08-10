@@ -6,3 +6,4 @@ tasks/
 ..Rcheck/
 *.Rcheck/
 *.tar.gz
+dist/
