@@ -14,11 +14,10 @@ The corresponding R value; see the mapping above.
 }
 \description{
 Parses one JSON document under janssonr's R-safe profile of RFC 8259.
-The parser refuses, with a classed condition, anything that cannot be
-represented faithfully in R: malformed or truncated input, trailing
-content, duplicate object keys at any depth, invalid UTF-8, embedded
-NUL escapes, numbers overflowing double, and integer literals whose
-magnitude exceeds 2^53. The exactness guarantee is for integer
+The parser refuses, with a classed condition: malformed or truncated
+input, trailing content, duplicate object keys at any depth, invalid
+UTF-8, embedded NUL escapes, numbers overflowing double, and integer
+literals whose magnitude exceeds 2^53. The exactness guarantee is for integer
 literals only: number literals with a fraction or exponent
 (\code{1.5}, \code{9007199254740993.0}, \code{1e-999}) convert by
 ordinary correctly rounded IEEE 754 double conversion.

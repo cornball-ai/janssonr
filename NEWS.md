@@ -10,8 +10,9 @@
 - `-0` encodes as `-0.0` so every finite double, signed zero included,
   round-trips bit-identically.
 - Parser rejects malformed input, trailing content, duplicate keys at any
-  depth, invalid UTF-8, NUL escapes, and numbers that cannot round-trip
-  into R doubles; errors are classed conditions with source coordinates.
+  depth, invalid UTF-8, NUL escapes, reals overflowing double, and
+  integer literals that cannot be represented exactly as R doubles;
+  errors are classed conditions with source coordinates.
 - Encoder writes compact UTF-8 JSON in insertion order, spells integral
   doubles as integers, and refuses values with no faithful JSON
   representation.

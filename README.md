@@ -4,9 +4,11 @@ Strict JSON for R, backed by the system [Jansson](https://github.com/akheron/jan
 C library. Two functions, zero R package dependencies.
 
 janssonr implements an **R-safe profile of RFC 8259**: RFC-conformant
-parsing plus deliberate extra restrictions, so that everything that
-parses is faithfully representable in R and everything that encodes is
-faithfully representable in JSON. Where common JSON packages guess
+parsing plus deliberate extra restrictions, so that what parses maps
+predictably into R (integer literals are exact or refused; fraction and
+exponent literals convert by correctly rounded double conversion) and
+everything that encodes is faithfully representable in JSON. Where
+common JSON packages guess
 (collapse duplicate keys, truncate at NUL, round big integers, stringify
 NA), janssonr refuses with a classed condition.
 
