@@ -1,0 +1,25 @@
+Package: r-cornball-janssonr
+Architecture: amd64
+Version: 0.0.1.3-1~noble
+Priority: optional
+Section: gnu-r
+Source: janssonr
+Maintainer: Troy Hernandez <troy@cornball.ai>
+Installed-Size: 114
+Depends: libc6 (>= 2.4), libjansson4 (>= 2.14), r-base-core, r-api-4.0
+Filename: pool/noble/main/r/janssonr/r-cornball-janssonr_0.0.1.3-1~noble_amd64.deb
+Size: 36196
+MD5sum: 458572159fcf4e6c7494b3c6b22ec743
+SHA1: 512df0c8aee1001523a462bbedfac0041f8b9bad
+SHA256: 114e53052a69d43a8de3d27629e5e76e02af422192ecbcf894f196d96d7639af
+SHA512: 1e6d6b6eadd0656f9366e3c9e03da07881ab293897ab08ac1c661796e248e227815651ed194b157be8dc8ab54987b610ac99c2920dc5cfc053fcb3ad2a50bcf0
+Homepage: https://github.com/cornball-ai/janssonr
+Description: strict JSON encode/decode for R via system libjansson
+ An R-safe profile of RFC 8259: duplicate-key rejection at any depth,
+ NUL and invalid-UTF-8 rejection, exact double round-trip, classed
+ error conditions with source coordinates.
+ .
+ Binary build linked against the system Jansson library: target
+ machines need only the libjansson4 runtime, never a compiler or
+ libjansson-dev.
+
