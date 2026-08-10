@@ -26,8 +26,9 @@ becomes an array (a length-1 list stays a 1-element array); a length-1
 unnamed atomic becomes a bare scalar; any other atomic becomes an
 array; \code{NULL} becomes \code{null}. Integral doubles with
 magnitude at most 2^53 are written as integers (\code{1}, not
-\code{1.0}; \code{-0} becomes \code{0}); other doubles are written
-with 17 significant digits, so every finite double round-trips to the
+\code{1.0}), except \code{-0}, which stays a real (\code{-0.0}) so
+its sign bit survives; other doubles are written with 17 significant
+digits. Every finite double, signed zero included, round-trips to the
 exact same value. The lexical spelling of non-integral doubles is not
 guaranteed byte-stable across Jansson versions.
 
