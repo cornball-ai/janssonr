@@ -124,7 +124,7 @@ static SEXP jr_decode_value(json_t *v, int depth, const jr_path_frame *frame)
             char *path = jr_path_build(frame);
             char msg[256];
             snprintf(msg, sizeof msg,
-                     "integer %lld at \"%s\" cannot be represented exactly as an R double",
+                     "integer %lld at \"%s\" is outside the safe range for an R double (magnitude above 2^53)",
                      (long long) iv, path);
             jr_stop_parse_error(msg, -1, -1, -1, "integer_precision", path);
         }

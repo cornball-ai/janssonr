@@ -93,8 +93,9 @@ expect_identical(from_json("1e-999"), 0)
 expect_equal(code_of("9223372036854775808"), "numeric_overflow")
 expect_equal(code_of("-9223372036854775809"), "numeric_overflow")
 
-# in (2^53, LLONG_MAX]: parses as an exact integer janssonr refuses to
-# round silently into a double
+# in (2^53, LLONG_MAX]: outside the safe-integer range (some values
+# there, like 2^53 + 2, are representable, but janssonr refuses the
+# whole range for predictability)
 big1 <- "9007199254740993"
 expect_identical(nchar(big1), 16L)
 expect_equal(code_of(big1), "integer_precision")
