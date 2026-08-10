@@ -40,7 +40,7 @@
 from_json <- function(x) {
     if (!(is.raw(x) || (is.character(x) && length(x) == 1L && !is.na(x)))) {
         stop(.input_error(
-            "x must be a length-1, non-NA character vector or a raw vector"))
+                          "x must be a length-1, non-NA character vector or a raw vector"))
     }
     .Call(C_jr_parse, x)
 }

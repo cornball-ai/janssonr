@@ -1,3 +1,6 @@
+# tinyrox says don't edit this manually, but it can't stop you!
+
 export(from_json)
 export(to_json)
+
 useDynLib(janssonr, .registration = TRUE, .fixes = "C_")

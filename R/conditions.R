@@ -6,7 +6,7 @@
 # All three also carry class "janssonr_error".
 .input_error <- function(message) {
     structure(
-        class = c("janssonr_input_error", "janssonr_error", "error",
-                  "condition"),
-        list(message = message, call = NULL))
+              class = c("janssonr_input_error", "janssonr_error", "error",
+                        "condition"),
+              list(message = message, call = NULL))
 }
