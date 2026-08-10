@@ -14,10 +14,15 @@ corpus <- c(
     5e-324,                       # smallest denormal
     2^53, 2^53 - 1, -(2^53),
     0.30000000000000004,          # 0.1 + 0.2
-    4.94065645841247e-324, 1.7976931348623157e308,
     runif(200), rnorm(200) * 1e6, 2^runif(100, -1020, 1020),
     -runif(50), 10^(-30:30)
 )
+# No near-xmax decimal LITERALS here: R's own parser (R_strtod)
+# accumulates in long double, and on arm64 long double IS double, so
+# 1.7976931348623157e308 overflows to Inf at R parse time (macOS CI
+# found this). .Machine$double.xmax above covers the extreme; jansson's
+# strtod parse path is correctly rounded and is tested via round-trip.
+expect_true(all(is.finite(corpus)))
 for (v in corpus) {
     # a refusal mid-corpus must name the value, not kill the file
     enc <- tryCatch(to_json(list(x = v)), error = function(e) e)
