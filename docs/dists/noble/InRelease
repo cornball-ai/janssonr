@@ -1,0 +1,19 @@
+Architectures: amd64
+Codename: noble
+Components: main
+Date: Mon, 10 Aug 2026 22:54:42 +0000
+Label: ppa for janssonr
+Origin: cornball-ai janssonr repository
+Suite: noble
+MD5Sum:
+ 8b43b71cd8974c44c1f6ed3c5952d86d             1102 main/binary-amd64/Packages
+ 5639085f01df51a5f9d0dc0130a85473              738 main/binary-amd64/Packages.gz
+SHA1:
+ df2e07ae94b70671bd838d1ca60ca70e26ec93a4             1102 main/binary-amd64/Packages
+ d6df02767e2c72c22191d74e7dc63b15b562bca9              738 main/binary-amd64/Packages.gz
+SHA256:
+ f199f29972746e03b15b47c5e5c29cd21b70b301c1c7eb1e93246312fe475424             1102 main/binary-amd64/Packages
+ db09b570a27a7780f9b08206a7e401dab2ee3873a7c49965701916caf214e03c              738 main/binary-amd64/Packages.gz
+SHA512:
+ 880313a8cdccbb0de0bc48541ac1f92cce2020355adbf50dcd3334a8796ea9fac6724e7175ed2f33ee1aead96be9eeb11f88ee82e4fda486dc0e798455a67f92             1102 main/binary-amd64/Packages
+ 401ac8e551b1217036b18934c2e2b69c358bfcecde66cd9a502e1d60d4086cd5ed143cd14c862842b55c4d24da920623cd3bb8b6414fff641919c3c10f734e8d              738 main/binary-amd64/Packages.gz

@@ -107,6 +107,32 @@ package compiles its bundled Jansson 2.15.1 sources (`src/jansson/`).
 remotes::install_github("cornball-ai/janssonr")
 ```
 
+### From the apt repository (Ubuntu, binary)
+
+Prebuilt `r-cornball-janssonr` packages are published to
+<https://cornball-ai.github.io/janssonr/>, built per suite so a client
+is never offered a build compiled against a different release. The
+repository is unsigned, so clients opt in with `Trusted: yes`. Set
+`Suites` to your release codename, `noble` for 24.04:
+
+```bash
+sudo tee /etc/apt/sources.list.d/janssonr.sources > /dev/null <<'EOF'
+Types: deb
+URIs: https://cornball-ai.github.io/janssonr
+Suites: noble
+Components: main
+Trusted: yes
+Enabled: yes
+EOF
+
+sudo apt update
+sudo apt install r-cornball-janssonr
+```
+
+The binary needs only the Jansson runtime (`libjansson4`), never a
+compiler or `libjansson-dev`. Debs are built by `tools/build-deb.sh`
+and indexed by `tools/mkrepo.sh` (rapt's repository pattern).
+
 ## Design notes
 
 - All Jansson interaction sits behind one internal C seam
