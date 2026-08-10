@@ -4,8 +4,11 @@
 #' The parser refuses, with a classed condition, anything that cannot be
 #' represented faithfully in R: malformed or truncated input, trailing
 #' content, duplicate object keys at any depth, invalid UTF-8, embedded
-#' NUL escapes, numbers overflowing double, and integers whose magnitude
-#' exceeds 2^53.
+#' NUL escapes, numbers overflowing double, and integer literals whose
+#' magnitude exceeds 2^53. The exactness guarantee is for integer
+#' literals only: number literals with a fraction or exponent
+#' (\code{1.5}, \code{9007199254740993.0}, \code{1e-999}) convert by
+#' ordinary correctly rounded IEEE 754 double conversion.
 #'
 #' Mapping: a JSON object becomes a named list in key order (an empty
 #' object keeps a \code{character(0)} names attribute, distinguishing it

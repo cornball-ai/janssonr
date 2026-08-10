@@ -18,11 +18,17 @@ corpus <- c(
     -runif(50), 10^(-30:30)
 )
 # No near-xmax decimal LITERALS here: R's own parser (R_strtod)
-# accumulates in long double, and on arm64 long double IS double, so
+# accumulates in long double, and on Apple's arm64 ABI long double IS
+# double (generic AArch64 Linux uses 128-bit quad), so
 # 1.7976931348623157e308 overflows to Inf at R parse time (macOS CI
 # found this). .Machine$double.xmax above covers the extreme; jansson's
 # strtod parse path is correctly rounded and is tested via round-trip.
 expect_true(all(is.finite(corpus)))
+
+# signed zero survives the round-trip bit-identically: identical(-0, 0)
+# is TRUE in R, so assert through the sign of the reciprocal
+expect_identical(1 / as.numeric(from_json(to_json(list(x = -0)))$x), -Inf)
+expect_identical(1 / as.numeric(from_json(to_json(list(x = 0)))$x), Inf)
 for (v in corpus) {
     # a refusal mid-corpus must name the value, not kill the file
     enc <- tryCatch(to_json(list(x = v)), error = function(e) e)

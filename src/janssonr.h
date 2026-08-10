@@ -3,6 +3,17 @@
 
 #include <R.h>
 #include <Rinternals.h>
+#include <Rversion.h>
+
+/* ANY_ATTRIB appeared in the package API in R 4.5. Older R still
+ * declares ATTRIB in the normal section (it moved behind
+ * ENABLE_LEGACY_NONAPI_FUNS only in 4.6), so it is the natural
+ * fallback there. */
+#if R_VERSION < R_Version(4, 5, 0)
+# define JR_HAS_ATTRIBS(x) (ATTRIB(x) != R_NilValue)
+#else
+# define JR_HAS_ATTRIBS(x) (ANY_ATTRIB(x) != 0)
+#endif
 
 /* entry points (init.c registers these) */
 SEXP jr_parse(SEXP input);
