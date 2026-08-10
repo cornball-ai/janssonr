@@ -1,0 +1,7 @@
+janssonr (0.0.1.3-1) unstable; urgency=medium
+
+  * Initial Debian packaging: r-cornball-janssonr, built with debhelper
+    so runtime dependencies (libc6, libjansson4) come from shlibdeps
+    rather than being hardcoded.
+
+ -- Troy Hernandez <troy@cornball.ai>  Mon, 10 Aug 2026 22:30:00 +0000

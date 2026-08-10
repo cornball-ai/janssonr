@@ -1,0 +1,21 @@
+Source: janssonr
+Section: gnu-r
+Priority: optional
+Maintainer: Troy Hernandez <troy@cornball.ai>
+Build-Depends: debhelper-compat (= 13), r-base-dev, libjansson-dev (>= 2.11)
+Standards-Version: 4.6.0
+Homepage: https://github.com/cornball-ai/janssonr
+Vcs-Git: https://github.com/cornball-ai/janssonr.git
+Vcs-Browser: https://github.com/cornball-ai/janssonr
+
+Package: r-cornball-janssonr
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, r-base-core, r-api-4.0
+Description: strict JSON encode/decode for R via system libjansson
+ An R-safe profile of RFC 8259: duplicate-key rejection at any depth,
+ NUL and invalid-UTF-8 rejection, exact double round-trip, classed
+ error conditions with source coordinates.
+ .
+ Binary build linked against the system Jansson library: target
+ machines need only the libjansson4 runtime, never a compiler or
+ libjansson-dev.

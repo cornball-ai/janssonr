@@ -2,4 +2,6 @@
 ^CLAUDE\.md$
 ^tasks$
 ^tools$
+^pkg$
+^dist$
 ^\.gitignore$
