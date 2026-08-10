@@ -1,3 +1,10 @@
+# janssonr 0.0.1.2
+
+- Windows support: Rtools bundles no jansson, so `Makevars.win` compiles
+  Jansson 2.15.1 sources vendored under `src/jansson/` (MIT, Petri
+  Lehtinen; cph added). Unix builds still link the system library.
+  `OS_type: unix` dropped.
+
 # janssonr 0.0.1.1
 
 - Wording: integer literals beyond 2^53 are refused for being outside

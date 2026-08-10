@@ -1,5 +1,6 @@
 src/*.o
 src/*.so
+src/jansson/*.o
 src/Makevars
 tasks/
 ..Rcheck/
