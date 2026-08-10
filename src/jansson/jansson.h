@@ -65,11 +65,10 @@ typedef struct json_t {
 
 #ifndef JANSSON_USING_CMAKE /* disabled if using cmake */
 #if JSON_INTEGER_IS_LONG_LONG
-#ifdef _WIN32
-#define JSON_INTEGER_FORMAT "I64d"
-#else
+/* janssonr patch: upstream uses the MSVCRT-era "I64d" on _WIN32; R's
+ * Windows toolchain is UCRT, which supports "lld", and gcc's format
+ * checker rejects "I64d". See PATCHES.md. */
 #define JSON_INTEGER_FORMAT "lld"
-#endif
 typedef long long json_int_t;
 #else
 #define JSON_INTEGER_FORMAT "ld"

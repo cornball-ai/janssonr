@@ -21,12 +21,15 @@ void jsonp_error_set_source(json_error_t *error, const char *source) {
         return;
 
     length = strlen(source);
+    /* janssonr patch: memcpy of length + 1 (the NUL included) is
+     * equivalent under the bound checks and avoids gcc's
+     * -Wstringop-truncation false positive. See PATCHES.md. */
     if (length < JSON_ERROR_SOURCE_LENGTH)
-        strncpy(error->source, source, length + 1);
+        memcpy(error->source, source, length + 1);
     else {
         size_t extra = length - JSON_ERROR_SOURCE_LENGTH + 4;
         memcpy(error->source, "...", 3);
-        strncpy(error->source + 3, source + extra, length - extra + 1);
+        memcpy(error->source + 3, source + extra, length - extra + 1);
     }
 }
 
