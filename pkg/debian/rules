@@ -17,3 +17,10 @@ override_dh_auto_install:
 
 override_dh_auto_clean:
 	rm -f janssonr_*.tar.gz
+
+# The compiled .so imports symbols by the BUILD R's headers (ANY_ATTRIB
+# needs R >= 4.5; stock noble ships 4.3), so the binary depends on
+# r-base-core of at least the build R minor, computed here rather than
+# hardcoded.
+override_dh_gencontrol:
+	dh_gencontrol -- -V"r:Depends=r-base-core (>= $(shell Rscript -e 'cat(with(R.version, sprintf("%s.%s.0", major, sub("[.].*", "", minor))))'))"

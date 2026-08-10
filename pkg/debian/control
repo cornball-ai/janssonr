@@ -10,7 +10,7 @@ Vcs-Browser: https://github.com/cornball-ai/janssonr
 
 Package: r-cornball-janssonr
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, r-base-core, r-api-4.0
+Depends: ${shlibs:Depends}, ${misc:Depends}, ${r:Depends}, r-api-4.0
 Description: strict JSON encode/decode for R via system libjansson
  An R-safe profile of RFC 8259: duplicate-key rejection at any depth,
  NUL and invalid-UTF-8 rejection, exact double round-trip, classed

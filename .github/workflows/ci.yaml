@@ -45,6 +45,31 @@ jobs:
       - name: Test
         run: ./run.sh run_tests
 
+  # Exercise the Debian packaging and repository tooling: build the deb
+  # inside the suite container (debhelper + lintian gate), index it with
+  # mkrepo.sh, and prove the versioned r-base-core dependency resolves
+  # and the installed package loads.
+  deb:
+    runs-on: ubuntu-latest
+    container: rocker/r2u:noble
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Build deb
+        run: SUITE=noble SRC="$PWD" OUT="$PWD/dist-ci" tools/build-deb-inner.sh
+
+      - name: Index repository
+        run: |
+          apt-get install -y --no-install-recommends apt-utils >/dev/null
+          mkdir repo-ci && cp docs/repo.conf repo-ci/
+          JANSSONR_REPO="$PWD/repo-ci" tools/mkrepo.sh noble dist-ci/*.deb
+
+      - name: Install and load
+        run: |
+          apt-get install -y ./dist-ci/r-cornball-janssonr_*.deb
+          dpkg -s r-cornball-janssonr | grep ^Depends
+          Rscript -e 'library(janssonr); cat(to_json(list(ok = TRUE)), "\n")'
+
   # Prove the declared jansson >= 2.11 floor with the real 2.11 library:
   # mapping and ownership behavior, not just symbol existence.
   floor:
