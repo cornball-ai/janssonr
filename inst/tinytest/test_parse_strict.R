@@ -103,6 +103,11 @@ expect_equal(code_of("9223372036854775807"), "integer_precision")
 # 2^53 itself is exact and accepted, as a double
 expect_identical(from_json("9007199254740992"), 9007199254740992)
 
+# the exactness guarantee is for INTEGER literals; a fraction or exponent
+# opts into ordinary correctly rounded REAL conversion
+expect_identical(from_json("9007199254740993.0"), 9007199254740992)
+expect_identical(from_json("9007199254740993e0"), 9007199254740992)
+
 ## ---- integer_precision condition anatomy ----
 e <- perr("{\"items\":[0,{\"id\":9007199254740993}]}")$err
 expect_inherits(e, "janssonr_parse_error")

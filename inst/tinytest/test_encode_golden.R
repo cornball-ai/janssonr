@@ -22,8 +22,8 @@ expect_identical(to_json(1), "1")
 expect_identical(to_json(list(x = 1)), "{\"x\":1}")
 expect_identical(to_json(-3), "-3")
 expect_identical(to_json(0), "0")
-# -0 loses its sign bit, documented
-expect_identical(to_json(-0), "0")
+# -0 stays a real so its sign bit survives the round-trip
+expect_identical(to_json(-0), "-0.0")
 # the 2^53 boundary, as an exact literal
 expect_identical(to_json(9007199254740992), "9007199254740992")
 expect_identical(to_json(-9007199254740992), "-9007199254740992")

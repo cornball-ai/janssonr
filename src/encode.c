@@ -11,11 +11,12 @@
  * is the rooted tree and any longjmp is leak-free. json_object_set_new and
  * json_array_append_new decref the value themselves on failure.
  *
- * Only documented R API entry points are used here: ATTRIB/TAG/CDR are
- * gone from the package API as of R 4.6 (an implicit declaration truncates
- * their returned pointers to int), so attribute checks go through
- * ANY_ATTRIB, Rf_getAttrib, and an attributes() eval for the rare
- * named-list-with-extra-attributes case. */
+ * Only documented R API entry points are used here: R 4.6 moved ATTRIB
+ * and SET_ATTRIB behind ENABLE_LEGACY_NONAPI_FUNS (an implicit
+ * declaration truncates the returned pointer to int); TAG/CDR/CAR remain
+ * declared but are not needed. Attribute checks go through JR_HAS_ATTRIBS
+ * (ANY_ATTRIB on R >= 4.5, ATTRIB on older R), Rf_getAttrib, and an
+ * attributes() eval for the rare named-list-with-extra-attributes case. */
 
 static void jr_attach(json_t *node, json_t *parent, const char *key,
                       SEXP holder)
@@ -77,8 +78,11 @@ static json_t *jr_scalar(SEXP x, R_xlen_t i)
         if (!R_FINITE(v))
             jr_stop_encode_error("cannot encode a non-finite number in JSON");
         /* integral doubles up to 2^53 spell as integers ("1", not the
-         * "1.0" jansson forces onto integral reals); -0 becomes "0" */
-        if (v == floor(v) && fabs(v) <= (double) JR_MAX_SAFE_INT)
+         * "1.0" jansson forces onto integral reals); -0 keeps its sign
+         * bit by staying a real ("-0.0"), so every finite double,
+         * signed zero included, round-trips bit-identically */
+        if (v == floor(v) && fabs(v) <= (double) JR_MAX_SAFE_INT
+            && !(v == 0.0 && signbit(v)))
             return json_integer((json_int_t) v);
         return json_real(v);
     }
@@ -122,7 +126,7 @@ static void jr_encode_value(SEXP x, json_t *parent, const char *key,
             jr_stop_encode_error("nesting depth exceeds 1024");
 
         nm = Rf_getAttrib(x, R_NamesSymbol);
-        if (ANY_ATTRIB(x)) {
+        if (JR_HAS_ATTRIBS(x)) {
             if (nm == R_NilValue)
                 jr_stop_encode_error("cannot encode a list with attributes other than names");
             jr_check_only_names(x);
@@ -168,7 +172,7 @@ static void jr_encode_value(SEXP x, json_t *parent, const char *key,
     case STRSXP: {
         R_xlen_t n = XLENGTH(x), i;
 
-        if (ANY_ATTRIB(x)) {
+        if (JR_HAS_ATTRIBS(x)) {
             if (Rf_getAttrib(x, R_NamesSymbol) != R_NilValue)
                 jr_stop_encode_error("cannot encode a named atomic vector (use a named list for an object)");
             jr_stop_encode_error("cannot encode an atomic vector with attributes");

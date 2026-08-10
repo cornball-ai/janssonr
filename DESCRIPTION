@@ -11,16 +11,19 @@ Description: An R-safe profile of RFC 8259 JSON: parsing and generation
     linked against the system 'Jansson' C library. The parser rejects, with
     classed conditions carrying line, column, and byte position: malformed
     or truncated input, trailing content, duplicate object keys at any
-    depth, invalid UTF-8, embedded NUL escapes, and numbers that cannot be
-    represented exactly as R values. Objects decode to named lists in key
-    order, arrays to unnamed lists, and scalars to length-one vectors. The
-    encoder maps named lists to objects in insertion order, unnamed lists
-    to arrays, guarantees that every finite double round-trips to the exact
-    same value (whole-number doubles are written as integers), and refuses
-    values with no faithful JSON representation ('NA', 'NaN', infinities,
-    named atomic vectors, classed objects) instead of guessing. No R
-    package dependencies.
+    depth, invalid UTF-8, embedded NUL escapes, reals overflowing double,
+    and integer literals that cannot be represented exactly as an R double.
+    Number literals with a fraction or exponent convert by ordinary
+    correctly rounded IEEE 754 double conversion. Objects decode to named
+    lists in key order, arrays to unnamed lists, and scalars to length-one
+    vectors. The encoder maps named lists to objects in insertion order,
+    unnamed lists to arrays, guarantees that every finite double, signed
+    zero included, round-trips to the exact same value (whole-number
+    doubles are written as integers), and refuses values with no faithful
+    JSON representation ('NA', 'NaN', infinities, named atomic vectors,
+    classed objects) instead of guessing. No R package dependencies.
 License: MIT + file LICENSE
+Depends: R (>= 4.4.0)
 URL: https://github.com/cornball-ai/janssonr
 BugReports: https://github.com/cornball-ai/janssonr/issues
 SystemRequirements: jansson (>= 2.11): libjansson-dev (deb),

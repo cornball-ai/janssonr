@@ -41,9 +41,13 @@ to_json(list(a = 1L, b = list(TRUE, NULL)))
 Rejected, with a classed error: malformed or truncated input, trailing
 content, duplicate object keys at any depth (including inside arrays of
 objects), invalid UTF-8, lone surrogates, NUL escapes, reals overflowing
-double (`1e999`), and integers whose magnitude exceeds 2^53 (no silent
-precision loss). Nesting is capped at 1024 containers by janssonr's own
-guard, independent of the Jansson version underneath.
+double (`1e999`), and integer literals whose magnitude exceeds 2^53 (no
+silent precision loss). The exactness guarantee is for integer literals;
+number literals with a fraction or exponent (`1.5`,
+`9007199254740993.0`, `1e-999`) use ordinary correctly rounded double
+conversion, so writing `.0` after a big integer opts into rounding.
+Nesting is capped at 1024 containers by janssonr's own guard,
+independent of the Jansson version underneath.
 
 Errors carry `line`, `column`, `position` (byte offset) and a stable
 `code` string (`"duplicate_key"`, `"invalid_utf8"`, ...). Refusals
@@ -58,7 +62,8 @@ Pointer in `path` instead.
 | unnamed list | array (a length-1 list stays a 1-element array) |
 | length-1 unnamed atomic | bare scalar |
 | other atomic | array of scalars |
-| integral double, magnitude <= 2^53 | integer spelling (`1`, not `1.0`; `-0` becomes `0`) |
+| integral double, magnitude <= 2^53 | integer spelling (`1`, not `1.0`) |
+| `-0` | `-0.0` (the sign bit survives the round-trip) |
 | other double | 17 significant digits: the exact value round-trips |
 | `NULL` | `null` |
 
@@ -81,9 +86,9 @@ janssonr_input_error   janssonr_parse_error   janssonr_encode_error
 
 ## Installation
 
-janssonr links against the system Jansson library, version **2.11 or
-newer** (Ubuntu 20.04+, Debian bullseye+, RHEL 8+, current Homebrew all
-qualify):
+janssonr needs R >= 4.4 and links against the system Jansson library,
+version **2.11 or newer** (Ubuntu 20.04+, Debian bullseye+, RHEL 8+,
+current Homebrew all qualify):
 
 ```sh
 # Debian/Ubuntu          # Fedora/RHEL              # macOS

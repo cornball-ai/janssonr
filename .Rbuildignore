@@ -1,4 +1,5 @@
 ^\.github$
 ^CLAUDE\.md$
 ^tasks$
+^tools$
 ^\.gitignore$
