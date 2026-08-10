@@ -1,19 +1,19 @@
 Architectures: amd64
 Codename: noble
 Components: main
-Date: Mon, 10 Aug 2026 22:54:42 +0000
+Date: Mon, 10 Aug 2026 23:20:29 +0000
 Label: ppa for janssonr
 Origin: cornball-ai janssonr repository
 Suite: noble
 MD5Sum:
- 8b43b71cd8974c44c1f6ed3c5952d86d             1102 main/binary-amd64/Packages
- 5639085f01df51a5f9d0dc0130a85473              738 main/binary-amd64/Packages.gz
+ 9148c3b38b2da0f1358c5b140ca8717b             2215 main/binary-amd64/Packages
+ 43e3fcc680d6edaec69adcb3aecc2c34              955 main/binary-amd64/Packages.gz
 SHA1:
- df2e07ae94b70671bd838d1ca60ca70e26ec93a4             1102 main/binary-amd64/Packages
- d6df02767e2c72c22191d74e7dc63b15b562bca9              738 main/binary-amd64/Packages.gz
+ 868c1a1173f550fc63a096384b1b6175fd8b940d             2215 main/binary-amd64/Packages
+ e53fb27d452cc16fda68c03c08bf088b234954b8              955 main/binary-amd64/Packages.gz
 SHA256:
- f199f29972746e03b15b47c5e5c29cd21b70b301c1c7eb1e93246312fe475424             1102 main/binary-amd64/Packages
- db09b570a27a7780f9b08206a7e401dab2ee3873a7c49965701916caf214e03c              738 main/binary-amd64/Packages.gz
+ 2dc11f842e75a9113dbbdc631dbe1b109bcf4fdc6505d8874c18e6cdd2e4d7a5             2215 main/binary-amd64/Packages
+ 616fbb6ccc36a2b997973b6ab1f563006536977015f824ace48441ceba693317              955 main/binary-amd64/Packages.gz
 SHA512:
- 880313a8cdccbb0de0bc48541ac1f92cce2020355adbf50dcd3334a8796ea9fac6724e7175ed2f33ee1aead96be9eeb11f88ee82e4fda486dc0e798455a67f92             1102 main/binary-amd64/Packages
- 401ac8e551b1217036b18934c2e2b69c358bfcecde66cd9a502e1d60d4086cd5ed143cd14c862842b55c4d24da920623cd3bb8b6414fff641919c3c10f734e8d              738 main/binary-amd64/Packages.gz
+ b95af8c68c03c90072796313761dfbc97389303f8721701628617478f0e11790fdb99539c0e0e3a3c0b70acbcb803b8ba46139ee7169edb8567774cc819864a4             2215 main/binary-amd64/Packages
+ 012fdc35de489f5ee51069105e4a1412a8460ebff5a91e6c9806aa48f20228106de4f3636ca387e6f2a5df558e06c195d4e5da9db17a14dc41358bc46a33f94f              955 main/binary-amd64/Packages.gz
