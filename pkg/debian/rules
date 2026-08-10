@@ -1,0 +1,19 @@
+#!/usr/bin/make -f
+
+export DH_VERBOSE = 1
+
+%:
+	dh $@
+
+override_dh_auto_build:
+	R CMD build --no-build-vignettes --no-manual ..
+
+override_dh_auto_install:
+	install -d debian/r-cornball-janssonr/usr/lib/R/site-library
+	R CMD INSTALL \
+	    --library=debian/r-cornball-janssonr/usr/lib/R/site-library \
+	    janssonr_*.tar.gz
+	rm -f janssonr_*.tar.gz
+
+override_dh_auto_clean:
+	rm -f janssonr_*.tar.gz
