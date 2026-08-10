@@ -88,27 +88,29 @@ janssonr_input_error   janssonr_parse_error   janssonr_encode_error
 
 ## Installation
 
-janssonr needs R >= 4.4 and links against the system Jansson library,
-version **2.11 or newer** (Ubuntu 20.04+, Debian bullseye+, RHEL 8+,
-current Homebrew all qualify):
+janssonr needs R >= 4.4. On Unix it links against the system Jansson
+library, version **2.11 or newer** (Ubuntu 20.04+, Debian bullseye+,
+RHEL 8+, current Homebrew all qualify):
 
 ```sh
 # Debian/Ubuntu          # Fedora/RHEL              # macOS
 apt install libjansson-dev   dnf install jansson-devel   brew install jansson
 ```
 
+On Windows nothing extra is needed: Rtools carries no jansson, so the
+package compiles its bundled Jansson 2.15.1 sources (`src/jansson/`).
+
 ```r
 remotes::install_github("cornball-ai/janssonr")
 ```
 
-Windows is not currently supported (`OS_type: unix`); vendoring the
-Jansson sources is the intended route if that changes.
-
 ## Design notes
 
 - All Jansson interaction sits behind one internal C seam
-  (`src/jr_jansson.h`), so switching to vendored sources later touches
-  only the build files, never the API.
+  (`src/jr_jansson.h`); Unix links the system library, Windows compiles
+  the bundled copy, and the package code cannot tell the difference.
+  The real-number contract stays value-level partly because the two
+  linkages may carry different Jansson versions.
 - No memory is leaked when R errors mid-conversion: the Jansson tree is
   owned by an external pointer finalizer from the moment it exists.
 - janssonr never touches Jansson's process-global state
