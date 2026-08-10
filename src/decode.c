@@ -59,6 +59,42 @@ static char *jr_path_build(const jr_path_frame *frame)
     return buf;
 }
 
+/* jansson reports one numeric_overflow code for two different things:
+ * an integer literal beyond long long ("too big integer") and a real
+ * literal beyond double ("real number overflow"). janssonr's stable
+ * taxonomy wants integer-form overflow under "integer_precision" (it is
+ * the same refusal as the post-parse 2^53 rule, detected earlier) and
+ * keeps "numeric_overflow" for real-form overflow. The form is decided
+ * from the numeric token around the error position in OUR input bytes,
+ * so no jansson error-message text is ever matched. */
+
+static int jr_numchar(char c)
+{
+    return (c >= '0' && c <= '9') || c == '+' || c == '-' || c == '.' ||
+           c == 'e' || c == 'E';
+}
+
+static const char *jr_overflow_code(const char *buf, size_t len, int position)
+{
+    size_t end, start, i;
+
+    if (position < 0)
+        return "numeric_overflow";
+    end = (size_t) position;
+    if (end > len)
+        end = len;
+    while (end < len && jr_numchar(buf[end]))
+        end++;
+    start = end;
+    while (start > 0 && jr_numchar(buf[start - 1]))
+        start--;
+    for (i = start; i < end; i++) {
+        if (buf[i] == '.' || buf[i] == 'e' || buf[i] == 'E')
+            return "numeric_overflow";
+    }
+    return "integer_precision";
+}
+
 static SEXP jr_decode_value(json_t *v, int depth, const jr_path_frame *frame)
 {
     switch (json_typeof(v)) {
@@ -172,9 +208,12 @@ SEXP jr_parse(SEXP input)
     holder = PROTECT(jr_holder_create());
     root = json_loadb(buf, len, JR_LOAD_FLAGS, &err);
     if (root == NULL) {
+        const char *code = jr_error_code_name(&err);
+        if (json_error_code(&err) == json_error_numeric_overflow)
+            code = jr_overflow_code(buf, len, err.position);
         UNPROTECT(1);
         jr_stop_parse_error(err.text, err.line, err.column, err.position,
-                            jr_error_code_name(&err), NULL);
+                            code, NULL);
     }
     jr_holder_set(holder, root);
 
