@@ -84,14 +84,26 @@ expect_error(from_json(c(as.raw(c(0xef, 0xbb, 0xbf)), charToRaw("{}"))),
              class = "janssonr_parse_error")
 
 ## ---- numeric limits (literal digit strings, never R arithmetic) ----
+# real-form overflow keeps numeric_overflow
 expect_equal(code_of("1e999"), "numeric_overflow")
 expect_equal(code_of("-1e999"), "numeric_overflow")
 # underflow is not an error: it parses as zero
 expect_identical(from_json("1e-999"), 0)
 
-# beyond long long: jansson refuses while lexing
-expect_equal(code_of("9223372036854775808"), "numeric_overflow")
-expect_equal(code_of("-9223372036854775809"), "numeric_overflow")
+# integer-form overflow beyond long long normalizes to integer_precision:
+# same taxonomy as the 2^53 refusal, just detected while lexing
+expect_equal(code_of("9223372036854775808"), "integer_precision")
+expect_equal(code_of("-9223372036854775809"), "integer_precision")
+expect_equal(code_of("12345678901234567890"), "integer_precision")
+
+# lexical integer overflow carries source coordinates but no JSON
+# Pointer (no AST exists yet); the post-parse 2^53 refusal is the
+# mirror image (NA coordinates, pointer present)
+e <- perr("{\"big\": 12345678901234567890}")$err
+expect_equal(e$code, "integer_precision")
+expect_true(is.integer(e$line) && e$line >= 1L)
+expect_true(is.integer(e$position) && e$position >= 1L)
+expect_identical(e$path, NA_character_)
 
 # in (2^53, LLONG_MAX]: outside the safe-integer range (some values
 # there, like 2^53 + 2, are representable, but janssonr refuses the

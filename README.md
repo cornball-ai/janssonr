@@ -52,9 +52,12 @@ Nesting is capped at 1024 containers by janssonr's own guard,
 independent of the Jansson version underneath.
 
 Errors carry `line`, `column`, `position` (byte offset) and a stable
-`code` string (`"duplicate_key"`, `"invalid_utf8"`, ...). Refusals
-detected after parsing (`"integer_precision"`) carry an RFC 6901 JSON
-Pointer in `path` instead.
+`code` string (`"duplicate_key"`, `"invalid_utf8"`, ...). Every
+integer-form refusal is `"integer_precision"`: detected post-parse
+(beyond 2^53) it carries an RFC 6901 JSON Pointer in `path`; detected
+by the lexer (beyond the parser's integer range) it carries source
+coordinates instead. `"numeric_overflow"` is real-form overflow
+(`1e999`).
 
 ### Encoding (`to_json`)
 

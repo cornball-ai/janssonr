@@ -40,10 +40,14 @@ Errors have class \code{c("janssonr_parse_error", "janssonr_error",
 "error", "condition")} and carry \code{line}, \code{column},
 \code{position} (byte offset) for lexical errors, plus \code{code}, a
 stable string such as \code{"duplicate_key"} or \code{"invalid_utf8"}.
-Refusals detected after parsing (\code{"integer_precision"},
-\code{"depth_limit"}) carry NA coordinates; \code{"integer_precision"}
-also carries \code{path}, an RFC 6901 JSON Pointer to the offending
-value.
+The \code{"integer_precision"} code covers every integer-form
+refusal: literals beyond 2^53 detected after parsing carry NA
+coordinates plus \code{path}, an RFC 6901 JSON Pointer to the
+offending value, while literals so large the lexer itself refuses
+them carry source coordinates and an NA \code{path} (no parse tree
+exists to point into). \code{"numeric_overflow"} is real-form
+overflow such as \code{1e999}; \code{"depth_limit"} carries NA
+coordinates.
 
 }
 \examples{

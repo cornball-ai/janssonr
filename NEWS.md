@@ -1,3 +1,14 @@
+# janssonr 0.0.1.3
+
+- Stable error taxonomy: integer-form overflow beyond long long
+  (`12345678901234567890`) now reports `"integer_precision"` like the
+  2^53 refusal, instead of leaking jansson's `"numeric_overflow"`;
+  that code is reserved for real-form overflow (`1e999`). Classified
+  from the numeric token at the error position in the input, never
+  from jansson's message text. Lexical integer overflow carries source
+  coordinates and an NA `path`; the post-parse 2^53 refusal carries NA
+  coordinates and an RFC 6901 pointer.
+
 # janssonr 0.0.1.2
 
 - Windows support: Rtools bundles no jansson, so `Makevars.win` compiles
