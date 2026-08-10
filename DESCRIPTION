@@ -12,7 +12,8 @@ Description: An R-safe profile of RFC 8259 JSON: parsing and generation
     classed conditions carrying line, column, and byte position: malformed
     or truncated input, trailing content, duplicate object keys at any
     depth, invalid UTF-8, embedded NUL escapes, reals overflowing double,
-    and integer literals that cannot be represented exactly as an R double.
+    and integer literals whose magnitude exceeds 2^53, the range within
+    which a double represents every integer exactly.
     Number literals with a fraction or exponent convert by ordinary
     correctly rounded IEEE 754 double conversion. Objects decode to named
     lists in key order, arrays to unnamed lists, and scalars to length-one

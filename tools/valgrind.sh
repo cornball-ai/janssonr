@@ -11,7 +11,11 @@ dir=$(mktemp -d)
 trap 'rm -rf "$dir"' EXIT
 mkdir "$dir/lib"
 echo "installing current checkout into temp library..."
-R CMD INSTALL --preclean --library="$dir/lib" "$pkg" >/dev/null 2>&1
+if ! R CMD INSTALL --preclean --library="$dir/lib" "$pkg" > "$dir/install.log" 2>&1; then
+    echo "installation failed:" >&2
+    cat "$dir/install.log" >&2
+    exit 1
+fi
 cat > "$dir/vg.R" <<'EOF'
 library(janssonr)
 library(tinytest)
