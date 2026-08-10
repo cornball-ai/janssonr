@@ -71,6 +71,12 @@ jobs:
       - name: Dependencies
         run: ./run.sh install_all
 
+      # r-ci's bootstrap occasionally degrades to Ubuntu's stock R when
+      # the CRAN apt repo add hiccups; janssonr needs >= 4.4, so name
+      # that failure here instead of burying it in the install step.
+      - name: Assert modern R
+        run: Rscript -e 'v <- getRversion(); cat("R", as.character(v), "\n"); stopifnot(v >= "4.4.0")'
+
       - name: Install against 2.11 and assert linkage
         run: |
           export PKG_CONFIG_PATH="$HOME/jansson211/lib/pkgconfig"
