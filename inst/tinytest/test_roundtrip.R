@@ -19,10 +19,18 @@ corpus <- c(
     -runif(50), 10^(-30:30)
 )
 for (v in corpus) {
-    got <- from_json(to_json(list(x = v)))$x
+    # a refusal mid-corpus must name the value, not kill the file
+    enc <- tryCatch(to_json(list(x = v)), error = function(e) e)
+    if (inherits(enc, "error")) {
+        expect_true(FALSE, info = sprintf("encode refused %.17g (%a): %s",
+                                          v, v, conditionMessage(enc)))
+        next
+    }
+    got <- from_json(enc)$x
     # as.numeric normalizes the documented whole-double -> integer
     # spelling; the VALUE must be bit-exact
-    expect_identical(as.numeric(got), v, info = sprintf("%.17g", v))
+    expect_identical(as.numeric(got), v,
+                     info = sprintf("%.17g via %s", v, enc))
 }
 # and bare scalars round-trip the same way
 for (v in c(1/3, 1e-300, 5e-324, .Machine$double.xmax)) {
