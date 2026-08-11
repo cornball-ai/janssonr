@@ -64,10 +64,20 @@ jobs:
           mkdir repo-ci && cp docs/repo.conf repo-ci/
           JANSSONR_REPO="$PWD/repo-ci" tools/mkrepo.sh noble dist-ci/*.deb
 
-      - name: Install and load
+      # Install by NAME through the scratch repository, so resolution,
+      # index checksums, and the pool layout are all on the tested path,
+      # and assert the versioned r-base-core dependency matches the
+      # build R rather than merely printing it.
+      - name: Install from the scratch repository and load
         run: |
-          apt-get install -y ./dist-ci/r-cornball-janssonr_*.deb
-          dpkg -s r-cornball-janssonr | grep ^Depends
+          printf 'Types: deb\nURIs: file://%s/repo-ci\nSuites: noble\nComponents: main\nTrusted: yes\nEnabled: yes\n' "$PWD" \
+            > /etc/apt/sources.list.d/janssonr-ci.sources
+          apt-get update -qq
+          apt-get install -y r-cornball-janssonr
+          want="r-base-core (>= $(Rscript -e 'cat(with(R.version, sprintf("%s.%s.0", major, sub("[.].*", "", minor))))'))"
+          echo "expect: $want"
+          dpkg -s r-cornball-janssonr | grep "^Depends:"
+          dpkg -s r-cornball-janssonr | grep "^Depends:" | grep -qF "$want"
           Rscript -e 'library(janssonr); cat(to_json(list(ok = TRUE)), "\n")'
 
   # Prove the declared jansson >= 2.11 floor with the real 2.11 library:
