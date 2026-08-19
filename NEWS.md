@@ -1,3 +1,21 @@
+# janssonr 0.1.0
+
+First CRAN release.
+
+- configure falls back to compiling the bundled Jansson 2.15.1 when no
+  usable system libjansson (>= 2.11) is found; CRAN's macOS builders
+  ship none. The system library is still preferred when present, and
+  `JANSSONR_VENDOR=1` (via `--configure-vars`) forces the bundled copy.
+  A system jansson older than 2.11 now selects the bundled copy instead
+  of failing the install; explicit `INCLUDE_DIR`/`LIB_DIR` that do not
+  yield a usable jansson remain a hard error.
+- The hand-written private configs for the bundled sources moved out of
+  `src/jansson/` into `src/config-win/` and the new `src/config-unix/`
+  (a config next to the sources would shadow the `-I` selection via
+  `jansson_private.h`'s quoted include).
+- The apt repository under `docs/` no longer reaches the source tarball
+  (`.Rbuildignore`).
+
 # janssonr 0.0.1.3
 
 - Stable error taxonomy: integer-form overflow beyond long long
