@@ -64,11 +64,13 @@ jobs:
           SO=$(Rscript -e 'cat(system.file("libs", paste0("janssonr", .Platform$dynlib.ext), package = "janssonr"))')
           if [ "$RUNNER_OS" = Linux ]; then ldd "$SO" > deps.out; else otool -L "$SO" > deps.out; fi
           cat deps.out
+          # "libjansson", not "jansson": the .so's own name (janssonr.so)
+          # appears in otool -L output and contains "jansson"
           if [ -n "${{ matrix.vendor }}" ]; then
-            if grep -qi jansson deps.out; then echo "vendored leg linked a system jansson" >&2; exit 1; fi
+            if grep -qi libjansson deps.out; then echo "vendored leg linked a system jansson" >&2; exit 1; fi
             Rscript -e 'stopifnot(janssonr:::jansson_version()[["compiled"]] == "2.15.1")'
           else
-            grep -qi jansson deps.out
+            grep -qi libjansson deps.out
           fi
 
       - name: Test
