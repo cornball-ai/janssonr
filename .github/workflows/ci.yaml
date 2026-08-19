@@ -10,24 +10,39 @@ env:
   _R_CHECK_FORCE_SUGGESTS_: "false"
 
 jobs:
+  # vendor: '' legs install a system jansson and must link it; vendor: 1
+  # legs strip any preinstalled jansson so configure's auto-fallback
+  # compiles the bundled 2.15.1 — the macOS one reproduces CRAN's mac
+  # builders, which carry no jansson at all.
   ci:
     strategy:
       fail-fast: false
       matrix:
         include:
-          - {os: ubuntu-latest, backend: RAPT}
-          - {os: macos-latest,  backend: ''}
+          - {os: ubuntu-latest, backend: RAPT, vendor: ''}
+          - {os: macos-latest,  backend: '',   vendor: ''}
+          - {os: ubuntu-latest, backend: RAPT, vendor: '1'}
+          - {os: macos-latest,  backend: '',   vendor: '1'}
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v6
 
       - name: Install libjansson (Linux)
-        if: runner.os == 'Linux'
+        if: runner.os == 'Linux' && matrix.vendor == ''
         run: sudo apt-get update -qq && sudo apt-get install -y --no-install-recommends libjansson-dev
 
       - name: Install jansson (macOS)
-        if: runner.os == 'macOS'
+        if: runner.os == 'macOS' && matrix.vendor == ''
         run: brew install jansson
+
+      - name: Remove any preinstalled jansson (vendored leg)
+        if: matrix.vendor != ''
+        run: |
+          if [ "$RUNNER_OS" = Linux ]; then
+            sudo apt-get remove -y libjansson-dev libjansson4 2>/dev/null || true
+          else
+            brew uninstall --ignore-dependencies jansson 2>/dev/null || true
+          fi
 
       - name: Setup r-ci
         uses: eddelbuettel/github-actions/r-ci@master
@@ -41,6 +56,20 @@ jobs:
         run: |
           R CMD INSTALL .
           Rscript -e 'v <- janssonr:::jansson_version(); print(v); stopifnot(identical(v[["compiled"]], v[["runtime"]]))'
+
+      # the .so's dynamic dependencies are the ground truth for which
+      # linkage configure chose (version strings could coincide)
+      - name: Assert linkage matches the leg
+        run: |
+          SO=$(Rscript -e 'cat(system.file("libs", paste0("janssonr", .Platform$dynlib.ext), package = "janssonr"))')
+          if [ "$RUNNER_OS" = Linux ]; then ldd "$SO" > deps.out; else otool -L "$SO" > deps.out; fi
+          cat deps.out
+          if [ -n "${{ matrix.vendor }}" ]; then
+            if grep -qi jansson deps.out; then echo "vendored leg linked a system jansson" >&2; exit 1; fi
+            Rscript -e 'stopifnot(janssonr:::jansson_version()[["compiled"]] == "2.15.1")'
+          else
+            grep -qi jansson deps.out
+          fi
 
       - name: Test
         run: ./run.sh run_tests
