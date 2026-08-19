@@ -1,6 +1,10 @@
 /* Hand-written private config for the bundled Jansson 2.15.1 sources,
- * targeting Windows (mingw-w64 ucrt64 via Rtools). Unix builds link the
- * system libjansson through configure and never compile these sources.
+ * targeting Windows (mingw-w64 ucrt64 via Rtools). Selected by
+ * Makevars.win via -Iconfig-win. Lives outside jansson/ because
+ * jansson_private.h includes this file with a quoted include, which
+ * searches its own directory first: a config next to the sources would
+ * silently shadow the -I selection (config-unix/ is the Unix fallback
+ * twin).
  * No WORDS_BIGENDIAN: dtoa.c then selects IEEE_8087 (little-endian),
  * correct for every Windows target R supports. */
 #define DTOA_ENABLED 1

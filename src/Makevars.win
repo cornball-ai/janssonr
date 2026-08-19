@@ -2,7 +2,7 @@
 # jansson/ build into the package here. Unix keeps linking the system
 # library via configure; jr_jansson.h is the seam that makes the two
 # indistinguishable to the package code.
-PKG_CPPFLAGS = -Ijansson -DHAVE_CONFIG_H
+PKG_CPPFLAGS = -Iconfig-win -Ijansson -DHAVE_CONFIG_H
 PKG_LIBS = -ladvapi32
 
 JANSSON_OBJS = jansson/dtoa.o jansson/dump.o jansson/error.o \

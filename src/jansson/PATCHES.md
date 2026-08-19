@@ -18,5 +18,8 @@ when refreshing the vendored copy; both are candidates for upstreaming.
    under R CMD check.
 
 `jansson_config.h` is the autotools-generated public config (gcc
-values, platform-neutral). `jansson_private_config.h` is hand-written
-for the Windows build; see its header comment.
+values, platform-neutral). The private configs are hand-written, one
+per platform, in `../config-win/` and `../config-unix/` — outside this
+directory because `jansson_private.h` includes
+`jansson_private_config.h` with a quoted include, which searches its
+own directory before any `-I` path; see their header comments.

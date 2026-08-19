@@ -5,3 +5,8 @@
 ^pkg$
 ^dist$
 ^\.gitignore$
+^docs$
+^cran-comments\.md$
+\.o$
+\.so$
+\.dll$
