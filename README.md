@@ -92,16 +92,20 @@ janssonr_input_error   janssonr_parse_error   janssonr_encode_error
 ## Installation
 
 janssonr needs R >= 4.4. On Unix it links against the system Jansson
-library, version **2.11 or newer** (Ubuntu 20.04+, Debian bullseye+,
-RHEL 8+, current Homebrew all qualify):
+library when a usable one is found, version **2.11 or newer** (Ubuntu
+20.04+, Debian bullseye+, RHEL 8+, current Homebrew all qualify):
 
 ```sh
 # Debian/Ubuntu          # Fedora/RHEL              # macOS
 apt install libjansson-dev   dnf install jansson-devel   brew install jansson
 ```
 
-On Windows nothing extra is needed: Rtools carries no jansson, so the
-package compiles its bundled Jansson 2.15.1 sources (`src/jansson/`).
+Without a system jansson the package compiles its bundled Jansson
+2.15.1 sources (`src/jansson/`) instead, so installation works on
+machines with no jansson at all — CRAN's macOS builders among them.
+Install the development package first if you want the system-linked
+build. On Windows the bundled copy is always used: Rtools carries no
+jansson.
 
 ```r
 remotes::install_github("cornball-ai/janssonr")
@@ -136,8 +140,9 @@ and indexed by `tools/mkrepo.sh` (rapt's repository pattern).
 ## Design notes
 
 - All Jansson interaction sits behind one internal C seam
-  (`src/jr_jansson.h`); Unix links the system library, Windows compiles
-  the bundled copy, and the package code cannot tell the difference.
+  (`src/jr_jansson.h`); Unix links the system library when one is
+  present, the bundled copy compiles in otherwise (and always on
+  Windows), and the package code cannot tell the difference.
   The real-number contract stays value-level partly because the two
   linkages may carry different Jansson versions.
 - No memory is leaked when R errors mid-conversion: the Jansson tree is

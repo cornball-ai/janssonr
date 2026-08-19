@@ -1,2 +1,15 @@
+# Filled in by configure. System-linked builds get jansson's flags and
+# no extra objects; when no usable system libjansson exists, configure
+# substitutes the JANSSON_OBJS list into OBJECTS and the bundled 2.15.1
+# sources under jansson/ compile into the package (config-unix/ holds
+# their private config). jr_jansson.h is the seam that makes the two
+# indistinguishable to the package code.
 PKG_CPPFLAGS = @cflags@
 PKG_LIBS = @libs@
+
+JANSSON_OBJS = jansson/dtoa.o jansson/dump.o jansson/error.o \
+    jansson/hashtable.o jansson/hashtable_seed.o jansson/load.o \
+    jansson/memory.o jansson/pack_unpack.o jansson/strbuffer.o \
+    jansson/strconv.o jansson/utf.o jansson/value.o jansson/version.o
+
+OBJECTS = conditions.o decode.o encode.o init.o jr_common.o @vendor_objs@

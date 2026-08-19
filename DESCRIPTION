@@ -29,8 +29,9 @@ License: MIT + file LICENSE
 Depends: R (>= 4.4.0)
 URL: https://github.com/cornball-ai/janssonr
 BugReports: https://github.com/cornball-ai/janssonr/issues
-SystemRequirements: On Unix, jansson (>= 2.11): libjansson-dev (deb),
-    jansson-devel (rpm), jansson (brew). On Windows, the bundled
-    Jansson 2.15.1 is compiled into the package.
+SystemRequirements: jansson (>= 2.11) is linked when present:
+    libjansson-dev (deb), jansson-devel (rpm), jansson (brew). When it
+    is absent, and always on Windows, the bundled Jansson 2.15.1 is
+    compiled into the package.
 Suggests: tinytest
 Encoding: UTF-8
