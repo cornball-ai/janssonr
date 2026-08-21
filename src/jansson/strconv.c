@@ -2,6 +2,7 @@
 #include "strbuffer.h"
 #include <assert.h>
 #include <errno.h>
+#include <locale.h>
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
@@ -22,9 +23,14 @@
     uselocale() instead.
 */
 static char get_decimal_point() {
-    char buf[3];
-    sprintf(buf, "%#.0f", 1.0); // "1." in the current locale
-    return buf[1];
+    /* janssonr patch: ask localeconv() for the separator instead of
+     * printing 1.0 with "%#.0f" and reading buf[1]. CRAN's compiled-code
+     * check rejects any object referencing sprintf, and snprintf is no
+     * way out (see PATCHES.md). localeconv() is C89, answers the
+     * question directly, and has no buffer to overflow - upstream's
+     * buf[3] holds "1." with exactly nothing to spare. */
+    const char *point = localeconv()->decimal_point;
+    return point[0] == '\0' ? '.' : point[0];
 }
 
 static void to_locale(strbuffer_t *strbuffer) {
@@ -73,7 +79,7 @@ int jsonp_dtostr(char *buffer, size_t size, double value, int precision) {
     char digits[25];
     char *digits_end;
     int mode = precision == 0 ? 0 : 2;
-    int decpt, sign, exp_len, exp = 0, use_exp = 0;
+    int decpt, sign, exp = 0, use_exp = 0;
     int digits_len, vdigits_start, vdigits_end;
     char *p;
 
@@ -158,9 +164,29 @@ int jsonp_dtostr(char *buffer, size_t size, double value, int precision) {
         p--;
 
     if (use_exp) {
+        /* janssonr patch: write the exponent without the printf family.
+         * CRAN's "compiled code" check rejects any object referencing
+         * sprintf, and swapping in snprintf does not help: gcc folds a
+         * provably-fitting snprintf back into sprintf (__sprintf_chk
+         * under _FORTIFY_SOURCE). Digits are emitted exactly as "%d"
+         * did - minus sign only, no padding - and the size check at the
+         * top of the function reserves the 5 bytes this can write. */
+        char expdigits[12];
+        unsigned int uexp;
+        int ndigits = 0;
+
         *p++ = 'e';
-        exp_len = sprintf(p, "%d", exp);
-        p += exp_len;
+        uexp = (unsigned int)exp;
+        if (exp < 0) {
+            *p++ = '-';
+            uexp = -uexp;
+        }
+        do {
+            expdigits[ndigits++] = (char)('0' + uexp % 10U);
+            uexp /= 10U;
+        } while (uexp != 0);
+        while (ndigits > 0)
+            *p++ = expdigits[--ndigits];
     }
     *p = '\0';
 

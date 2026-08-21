@@ -1,19 +1,21 @@
 Package: janssonr
 Type: Package
 Title: Strict JSON Encoding and Decoding via the 'Jansson' C Library
-Version: 0.1.0
-Date: 2026-08-19
+Version: 0.1.1
+Date: 2026-08-21
 Authors@R: c(
     person("Troy", "Hernandez", role = c("aut", "cre"), email = "troy@cornball.ai",
            comment = c(ORCID = "0009-0005-4248-604X")),
     person("cornball.ai", role = "cph"),
     person("Petri", "Lehtinen", role = "cph",
-           comment = "Jansson C library, bundled for Windows builds"))
+           comment = "Jansson C library, bundled under src/jansson"))
 Description: An R-safe profile of RFC 8259 JSON: parsing and generation
-    linked against the system 'Jansson' C library. The parser rejects, with
-    classed conditions carrying line, column, and byte position: malformed
-    or truncated input, trailing content, duplicate object keys at any
-    depth, invalid UTF-8, embedded NUL escapes, reals overflowing double,
+    backed by the 'Jansson' C library, linked as a system library where one
+    is available and compiled from the bundled sources otherwise. The
+    parser rejects, with classed conditions carrying line, column, and byte
+    position: malformed or truncated input, trailing content, duplicate
+    object keys at any depth, invalid UTF-8, escapes encoding a null
+    character, reals overflowing double,
     and integer literals whose magnitude exceeds 2^53, the range within
     which a double represents every integer exactly.
     Number literals with a fraction or exponent convert by ordinary

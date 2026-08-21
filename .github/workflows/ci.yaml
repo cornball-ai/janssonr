@@ -76,6 +76,22 @@ jobs:
       - name: Test
         run: ./run.sh run_tests
 
+      # r-ci's run_tests does not fail on check WARNINGs. The 0.1.0
+      # submission was rejected for warnings this workflow had already
+      # printed and then reported success on, so gate on them here.
+      - name: Fail on check WARNINGs
+        run: |
+          log=$(find . -name 00check.log -print -quit)
+          if [ -z "$log" ]; then
+            echo "no 00check.log found - the check did not run" >&2
+            exit 1
+          fi
+          grep -E "^Status" "$log"
+          if grep -qE "^Status:.*(ERROR|WARNING)" "$log"; then
+            grep -B2 -A8 -E "\.\.\. (ERROR|WARNING)" "$log" >&2
+            exit 1
+          fi
+
   # Exercise the Debian packaging and repository tooling: build the deb
   # inside the suite container (debhelper + lintian gate), index it with
   # mkrepo.sh, and prove the versioned r-base-core dependency resolves
@@ -110,6 +126,19 @@ jobs:
           dpkg -s r-cornball-janssonr | grep "^Depends:"
           dpkg -s r-cornball-janssonr | grep "^Depends:" | grep -qF "$want"
           Rscript -e 'library(janssonr); cat(to_json(list(ok = TRUE)), "\n")'
+
+  # CRAN's Debian leg compiles the BUNDLED Jansson (its machines have no
+  # system jansson) with a gcc newer than any distro we build on. Both
+  # facts together hid the warnings that got 0.1.0 rejected, so mirror
+  # that environment and fail on WARNINGs.
+  cran:
+    runs-on: ubuntu-latest
+    container: rocker/r-devel:latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: as-cran check, bundled Jansson, newest gcc
+        run: SRC="$PWD" bash tools/cran-check.sh
 
   # Prove the declared jansson >= 2.11 floor with the real 2.11 library:
   # mapping and ownership behavior, not just symbol existence.
