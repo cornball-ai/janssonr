@@ -62,19 +62,67 @@ jobs:
       - name: Assert linkage matches the leg
         run: |
           SO=$(Rscript -e 'cat(system.file("libs", paste0("janssonr", .Platform$dynlib.ext), package = "janssonr"))')
-          if [ "$RUNNER_OS" = Linux ]; then ldd "$SO" > deps.out; else otool -L "$SO" > deps.out; fi
-          cat deps.out
+          # outside the package tree: R CMD check counts a stray file in
+          # the source root as a non-standard top-level file
+          deps="${RUNNER_TEMP:-/tmp}/deps.out"
+          if [ "$RUNNER_OS" = Linux ]; then ldd "$SO" > "$deps"; else otool -L "$SO" > "$deps"; fi
+          cat "$deps"
           # "libjansson", not "jansson": the .so's own name (janssonr.so)
           # appears in otool -L output and contains "jansson"
           if [ -n "${{ matrix.vendor }}" ]; then
-            if grep -qi libjansson deps.out; then echo "vendored leg linked a system jansson" >&2; exit 1; fi
+            if grep -qi libjansson "$deps"; then echo "vendored leg linked a system jansson" >&2; exit 1; fi
             Rscript -e 'stopifnot(janssonr:::jansson_version()[["compiled"]] == "2.15.1")'
           else
-            grep -qi libjansson deps.out
+            grep -qi libjansson "$deps"
           fi
 
       - name: Test
         run: ./run.sh run_tests
+
+      # r-ci's run_tests does not fail on check WARNINGs. The 0.1.0
+      # submission was rejected for warnings this workflow had already
+      # printed and then reported success on, so gate on them here.
+      - name: Fail on check WARNINGs
+        run: |
+          log=$(find . -name 00check.log -print -quit)
+          if [ -z "$log" ]; then
+            echo "no 00check.log found - the check did not run" >&2
+            exit 1
+          fi
+          grep -E "^Status" "$log"
+          # Any compiler or linker warning is a finding, with one
+          # exception: the GitHub macOS runners carry libR and homebrew
+          # dylibs built for a newer deployment target than R targets,
+          # so every link there emits "ld: warning: building for
+          # macOS-11.0, but linking with dylib ... built for newer
+          # version". CRAN's macOS builders do not, and we cannot
+          # rebuild the runner's dylibs. Nothing else is tolerated.
+          if grep -E "warning:" "$log" | grep -qv "building for macOS"; then
+            echo "unexpected compiler/linker warnings:" >&2
+            grep -E "warning:" "$log" | grep -v "building for macOS" >&2
+            exit 1
+          fi
+          # and no warning-level check. Two runner artifacts are excused,
+          # each only when the thing that excuses it is actually present,
+          # so these cannot quietly cover a real finding:
+          other=$(grep -E "^\* checking .*\.\.\. (ERROR|WARNING)" "$log") || true
+          #  - the install WARNING, when the tolerated ld noise triggered it
+          if grep -q "building for macOS" "$log"; then
+            other=$(echo "$other" | grep -v "can be installed") || true
+          fi
+          #  - top-level files, when its only complaint is that the macOS
+          #    runners have no checkbashisms script (a stray file in the
+          #    source root reports here too, and must still fail)
+          if grep -q "needs the 'checkbashisms' script" "$log" &&
+             ! grep -q "Non-standard file" "$log"; then
+            other=$(echo "$other" | grep -v "top-level files") || true
+          fi
+          if [ -n "$other" ]; then
+            echo "check reported:" >&2
+            echo "$other" >&2
+            grep -B2 -A8 -E "\.\.\. (ERROR|WARNING)" "$log" >&2
+            exit 1
+          fi
 
   # Exercise the Debian packaging and repository tooling: build the deb
   # inside the suite container (debhelper + lintian gate), index it with
@@ -110,6 +158,19 @@ jobs:
           dpkg -s r-cornball-janssonr | grep "^Depends:"
           dpkg -s r-cornball-janssonr | grep "^Depends:" | grep -qF "$want"
           Rscript -e 'library(janssonr); cat(to_json(list(ok = TRUE)), "\n")'
+
+  # CRAN's Debian leg compiles the BUNDLED Jansson (its machines have no
+  # system jansson) with a gcc newer than any distro we build on. Both
+  # facts together hid the warnings that got 0.1.0 rejected, so mirror
+  # that environment and fail on WARNINGs.
+  cran:
+    runs-on: ubuntu-latest
+    container: rocker/r-devel:latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: as-cran check, bundled Jansson, newest gcc
+        run: SRC="$PWD" bash tools/cran-check.sh
 
   # Prove the declared jansson >= 2.11 floor with the real 2.11 library:
   # mapping and ownership behavior, not just symbol existence.

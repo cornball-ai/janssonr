@@ -1,3 +1,28 @@
+# janssonr 0.1.1
+
+Resubmission after CRAN's incoming pretest. Every finding was in the
+bundled Jansson sources, which compile only when no system library is
+present: the configuration CRAN's machines use, and the one our own
+checks were not exercising.
+
+- The bundled Jansson no longer references `sprintf` anywhere. The
+  decimal separator now comes from `localeconv()` instead of printing
+  1.0 into a three-byte buffer, and the exponent in `jsonp_dtostr()` is
+  written digit by digit. Substituting `snprintf` is not enough here:
+  gcc folds an `snprintf` whose output it can prove fits back into
+  `sprintf`, so the object still referenced it with no `sprintf` in the
+  source. Encoded output is unchanged, verified byte-for-byte over 1039
+  doubles, 1009 of them in exponent form.
+- The two `snprintf` calls in the bundled `load.c` bound their
+  conversions with explicit precisions, so gcc 16 can prove the trailing
+  literal is never truncated, and `%p` in the bundled `value.c` takes a
+  `const void *`.
+- `configure` no longer uses `command -v`, flagged as a possible bashism.
+- DESCRIPTION describes the system/bundled arrangement accurately.
+- New `tools/cran-check.sh` reproduces CRAN's Debian leg (bundled
+  Jansson, newest gcc, fails on WARNINGs). CI runs it, and every check
+  leg now fails on a WARNING rather than printing it and passing.
+
 # janssonr 0.1.0
 
 First CRAN release.

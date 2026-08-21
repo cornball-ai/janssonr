@@ -109,8 +109,11 @@ static void error_set(json_error_t *error, const lex_t *lex, enum json_error_cod
 
         if (saved_text && saved_text[0]) {
             if (lex->saved_text.length <= 20) {
-                snprintf(msg_with_context, JSON_ERROR_TEXT_LENGTH, "%s near '%s'",
-                         msg_text, saved_text);
+                /* janssonr patch: explicit precisions bound the output to
+                 * 159 bytes + NUL, so gcc can prove the literal is never
+                 * truncated away (-Wformat-truncation) */
+                snprintf(msg_with_context, JSON_ERROR_TEXT_LENGTH,
+                         "%.131s near '%.20s'", msg_text, saved_text);
                 msg_with_context[JSON_ERROR_TEXT_LENGTH - 1] = '\0';
                 result = msg_with_context;
             }
@@ -123,8 +126,9 @@ static void error_set(json_error_t *error, const lex_t *lex, enum json_error_cod
                 /* No context for UTF-8 decoding errors */
                 result = msg_text;
             } else {
-                snprintf(msg_with_context, JSON_ERROR_TEXT_LENGTH, "%s near end of file",
-                         msg_text);
+                /* janssonr patch: precision, as above */
+                snprintf(msg_with_context, JSON_ERROR_TEXT_LENGTH,
+                         "%.142s near end of file", msg_text);
                 msg_with_context[JSON_ERROR_TEXT_LENGTH - 1] = '\0';
                 result = msg_with_context;
             }
