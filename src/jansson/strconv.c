@@ -17,10 +17,11 @@
     character.
 
   - If setlocale() is called by another thread between the call to
-    get_decimal_point() and the call to sprintf() or strtod(), the
-    result may be wrong. setlocale() is not thread-safe and should
-    not be used this way. Multi-threaded programs should use
-    uselocale() instead.
+    get_decimal_point() and the call to strtod(), the result may be
+    wrong. setlocale() is not thread-safe and should not be used this
+    way. Multi-threaded programs should use uselocale() instead.
+    (janssonr patch: upstream also names sprintf() here, which
+    get_decimal_point() no longer calls.)
 */
 static char get_decimal_point() {
     /* janssonr patch: ask localeconv() for the separator instead of
