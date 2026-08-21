@@ -10,7 +10,10 @@
 #
 # Runs inside a Debian R-devel container. Locally:
 #
-#   docker run --rm -v "$PWD":/src rocker/r-devel:latest bash /src/tools/cran-check.sh
+#   docker run --rm -v "$PWD":/src:ro rocker/r-devel:latest bash /src/tools/cran-check.sh
+#
+# Mount read-only: the container runs as root, and anything it writes
+# into a read-write bind mount lands in your tree owned by root.
 #
 # Unlike `R CMD check` on its own, this FAILS on WARNINGs - a check that
 # prints the reason CRAN will reject you and then exits 0 is not a gate.
