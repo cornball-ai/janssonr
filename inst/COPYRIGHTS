@@ -1,0 +1,61 @@
+Copyright statements for janssonr
+=================================
+
+janssonr itself is
+
+    Copyright (c) 2026 cornball.ai
+    MIT License (see LICENSE)
+
+It bundles the Jansson C library, version 2.15.1
+(https://github.com/akheron/jansson), under src/jansson/. Those sources
+compile into the package only when no usable system libjansson (>= 2.11)
+is found, and always on Windows. Every local change to them is listed in
+src/jansson/PATCHES.md.
+
+Jansson is MIT-licensed; the full text is src/jansson/LICENSE. Its
+copyright holders, taken from the file headers:
+
+    Copyright (c) 2009-2016 Petri Lehtinen
+        The library as a whole (LICENSE: 2009-2024), and
+        src/jansson/dump.c, hashtable.c, hashtable.h, jansson.h,
+        jansson_config.h (2010-2016), jansson_private.h, load.c,
+        memory.c, pack_unpack.c, strbuffer.c, strbuffer.h, utf.c, utf.h,
+        value.c
+
+    Copyright (c) 2011-2012 Basile Starynkevitch
+        src/jansson/memory.c (jointly with Petri Lehtinen)
+
+    Copyright (c) 2011-2012 Graeme Smecher
+        src/jansson/pack_unpack.c (jointly with Petri Lehtinen)
+
+    Copyright (c) 2019 Sean Bright
+        src/jansson/version.c
+
+Two files under src/jansson/ are third-party code that Jansson itself
+bundles, each under its own terms, reproduced in the file headers:
+
+    src/jansson/dtoa.c
+        Author: David M. Gay
+        Copyright (c) 1991, 2000, 2001 by Lucent Technologies.
+
+        Permission to use, copy, modify, and distribute this software
+        for any purpose without fee is hereby granted, provided that
+        this entire notice is included in all copies of any software
+        which is or includes a copy or modification of this software
+        and in all copies of the supporting documentation for such
+        software.
+
+        THIS SOFTWARE IS BEING PROVIDED "AS IS", WITHOUT ANY EXPRESS OR
+        IMPLIED WARRANTY.  IN PARTICULAR, NEITHER THE AUTHOR NOR LUCENT
+        MAKES ANY REPRESENTATION OR WARRANTY OF ANY KIND CONCERNING THE
+        MERCHANTABILITY OF THIS SOFTWARE OR ITS FITNESS FOR ANY
+        PARTICULAR PURPOSE.
+
+    src/jansson/lookup3.h
+        lookup3.c by Bob Jenkins, May 2006. Public domain; no copyright
+        is claimed.
+
+The remaining files under src/jansson/ (error.c, hashtable_seed.c,
+strconv.c) carry no copyright header of their own and fall under
+Jansson's LICENSE. The hand-written private configs in src/config-unix/
+and src/config-win/ are janssonr's own.

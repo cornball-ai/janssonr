@@ -1,3 +1,19 @@
+# janssonr 0.1.2
+
+Resubmission after CRAN's review of 0.1.1. DESCRIPTION only; no code
+changed.
+
+- `Authors@R` now lists every author and copyright holder of the
+  bundled Jansson sources, not just Jansson's author: Petri Lehtinen
+  (ctb, cph), Basile Starynkevitch (ctb, cph: `memory.c`), Graeme
+  Smecher (ctb, cph: `pack_unpack.c`), Sean Bright (ctb, cph:
+  `version.c`), David M. Gay (ctb) and Lucent Technologies (cph) for
+  `dtoa.c`, and Bob Jenkins (ctb) for the public-domain `lookup3.h`. A
+  `Copyright` field points at the new `inst/COPYRIGHTS`, which records
+  the per-file statements and license terms.
+- `NA` and `NaN` in the Description are no longer single-quoted; CRAN
+  reserves those quotes for software names.
+
 # janssonr 0.1.1
 
 Resubmission after CRAN's incoming pretest. Every finding was in the
