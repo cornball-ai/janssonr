@@ -25,7 +25,13 @@ struct hashtable_pair {
     size_t hash;
     json_t *value;
     size_t key_len;
-    char key[1];
+    /* janssonr patch: C99 flexible array member, was the pre-C99
+       one-element array `char key[1]`. init_pair() already allocates
+       offsetof(pair, key) + key_len + 1 bytes, so only the declared
+       type changes: indexing past element 0 of a char[1] is out of
+       bounds under gcc's -fsanitize=bounds-strict (CRAN's gcc-UBSAN
+       check), and a flexible array member has no bound to violate. */
+    char key[];
 };
 
 struct hashtable_bucket {

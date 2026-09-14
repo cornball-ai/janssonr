@@ -48,6 +48,24 @@ for (v in c(1/3, 1e-300, 5e-324, .Machine$double.xmax)) {
     expect_identical(as.numeric(from_json(to_json(v))), v)
 }
 
+## ---- whole-number doubles above 2^53 that take dtoa's Bigint path ----
+# Whole doubles up to 2^53 are spelled as integers; above that they go
+# through jansson's real encoder, the bundled dtoa.c in shortest form.
+# Its 64-bit fast path handles nearly every double and gives up only for
+# values like these, which then run its multi-word Bigint arithmetic:
+# code CRAN's -fsanitize=bounds-strict check had not reached before
+# patch 7 in src/jansson/PATCHES.md. Built arithmetically (every term
+# exact) rather than as 17-digit literals, per the R_strtod note above.
+bigint_path <- c(2^54 + 4, 2^55 + 8,
+                 2^54 + 4 * 2748036319911712,      # 29006543789128832
+                 2^56 + 16 * 1308254251507712)     # 92989662062051328
+expect_true(all(bigint_path == floor(bigint_path) & bigint_path > 2^53))
+for (v in bigint_path) {
+    enc <- to_json(list(x = v))
+    expect_identical(as.numeric(from_json(enc)$x), v, info = enc)
+    expect_identical(as.numeric(from_json(to_json(v))), v)
+}
+
 ## ---- 2. structural round-trip over decode-shaped trees ----
 # decode-shaped: unnamed/named lists of scalars, non-integral doubles,
 # integers, strings, logicals, NULLs. For these, from_json(to_json(x))
