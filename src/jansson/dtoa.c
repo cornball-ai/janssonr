@@ -1527,7 +1527,8 @@ extern "C" char *dtoa(double d, int mode, int ndigits,
 Bigint {
 	struct Bigint *next;
 	int k, maxwds, sign, wds;
-	ULong x[1];
+	ULong x[];	/* janssonr patch: flexible array member, was x[1];
+			   Balloc() sizes the block for x words accordingly */
 	};
 
  typedef struct Bigint Bigint;
@@ -1608,10 +1609,12 @@ Balloc(int k MTd)
 		freelist[k] = rv->next;
 	else {
 		x = 1 << k;
+		/* janssonr patch: x is a flexible array member, so sizeof(Bigint)
+		   is the header alone and the block needs x words, not x-1 */
 #ifdef Omit_Private_Memory
-		rv = (Bigint *)MALLOC(sizeof(Bigint) + (x-1)*sizeof(ULong));
+		rv = (Bigint *)MALLOC(sizeof(Bigint) + x*sizeof(ULong));
 #else
-		len = (sizeof(Bigint) + (x-1)*sizeof(ULong) + sizeof(double) - 1)
+		len = (sizeof(Bigint) + x*sizeof(ULong) + sizeof(double) - 1)
 			/sizeof(double);
 		if (k <= Kmax && (unsigned long)(pmem_next - private_mem + len) <= PRIVATE_mem
 #ifdef MULTIPLE_THREADS
@@ -4920,8 +4923,11 @@ rv_alloc(int i MTd)
 	int j, k, *r;
 
 	j = sizeof(ULong);
+	/* janssonr patch: a Balloc(k) block holds sizeof(Bigint) + j bytes
+	   now that x is a flexible array member (was sizeof(Bigint) +
+	   j - sizeof(ULong)); usable string space is that less the int */
 	for(k = 0;
-		sizeof(Bigint) - sizeof(ULong) - sizeof(int) + j <= (size_t)i;
+		sizeof(Bigint) - sizeof(int) + j <= (size_t)i;
 		j <<= 1)
 			k++;
 	r = (int*)Balloc(k MTa);
@@ -5336,7 +5342,9 @@ dtoa_r(double dd, int mode, int ndigits, int *decpt, int *sign, char **rve, char
 		}
 	if (!buf) {
 		buf = rv_alloc(i MTb);
-		blen = sizeof(Bigint) + ((1 << ((int*)buf)[-1]) - 1)*sizeof(ULong) - sizeof(int);
+		/* janssonr patch: same block size as rv_alloc(), x being a
+		   flexible array member (was (1 << k) - 1 words) */
+		blen = sizeof(Bigint) + (1 << ((int*)buf)[-1])*sizeof(ULong) - sizeof(int);
 		}
 	else if (blen <= (size_t)i) {
 		buf = 0;

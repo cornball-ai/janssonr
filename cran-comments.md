@@ -1,56 +1,58 @@
-# cran-comments for janssonr 0.1.2
+# cran-comments for janssonr 0.1.3
 
-## Resubmission
+## Update fixing an issue reported by CRAN
 
-This is a resubmission, following CRAN's review of 0.1.1. Both requests
-are addressed; no code changed.
+0.1.2 was published on 2026-09-12. This update fixes the gcc-UBSAN
+finding reported on it under "Additional issues"
+(https://www.stats.ox.ac.uk/pub/bdr/memtests/gcc-UBSAN/janssonr/):
 
-- The single quotes around NA and NaN in the Description are removed.
-  The only quoted term left is 'Jansson', the name of the C library.
+    jansson/hashtable.c:217:14: runtime error: index 1 out of bounds for type 'char [1]'
 
-- Authors@R now names every author and copyright holder of the bundled
-  Jansson sources (src/jansson/), found by reading every file header in
-  that directory. Previously only Jansson's author was listed, as cph.
-  Added:
-  - Petri Lehtinen: ctb as well as cph (author of Jansson; holds
-    copyright on the library and on most of its files).
-  - Basile Starynkevitch, ctb and cph: memory.c.
-  - Graeme Smecher, ctb and cph: pack_unpack.c.
-  - Sean Bright, ctb and cph: version.c.
-  - David M. Gay, ctb, and Lucent Technologies, cph: dtoa.c, which
-    Jansson bundles under Lucent's own permissive notice. That notice
-    is preserved in the file header and in src/jansson/LICENSE.
-  - Bob Jenkins, ctb: lookup3.h, which is public domain, so there is
-    no copyright holder to list.
+The bundled Jansson's `struct hashtable_pair` ended in the pre-C99
+one-element array `char key[1]`, with each pair allocated at
+`offsetof(pair, key) + key_len + 1` bytes and the key written past
+element 0. The member is now a C99 flexible array member (`char key[]`).
+Allocation sizes and layout are unchanged; only the declared type is,
+so `-fsanitize=bounds-strict` has nothing to report.
 
-  A new Copyright field points at inst/COPYRIGHTS, which lists these
-  per file together with each license statement.
+The same pattern in the bundled dtoa.c (`struct Bigint`, `ULong x[1]`)
+is fixed the same way, with `Balloc()`'s size arithmetic adjusted for
+the new `sizeof`. CRAN's run had not reached that code (dtoa's 64-bit
+fast path handles nearly every double), but shortest-form encoding of
+some whole-number doubles above 2^53 does reach it and trips the same
+check; the test suite now covers such values.
 
-The 0.1.1 submission had cleared the incoming pretest findings on 0.1.0
-(a `sprintf` reference and two `-Wformat` warnings in the bundled
-sources, and a possible bashism in configure); those changes are
-carried over unchanged and described in NEWS.md.
+Both changes are confined to the bundled sources under src/jansson/,
+which compile only when no system Jansson >= 2.11 is found, and are
+documented in src/jansson/PATCHES.md.
 
 ## Test environments
 
-The package sources are identical to 0.1.1 apart from DESCRIPTION,
-NEWS.md and the new inst/COPYRIGHTS. Re-checked for this submission:
-
+- CRAN's gcc-UBSAN configuration reproduced (bundled Jansson compiled
+  with `-fsanitize=undefined,bounds-strict`, then `R CMD check`), via
+  the new `tools/ubsan-check.sh`: the 0.1.2 sources reproduce the
+  report, the 0.1.3 sources produce no sanitizer output from the
+  examples or the tests. Ubuntu 24.04 gcc 13 / R 4.6.1, and Debian
+  R-devel with the newest gcc in the rocker/r-devel container.
 - Debian, R-devel, newest gcc, bundled Jansson (CRAN's Debian flavor),
-  via `tools/cran-check.sh`
+  `R CMD check --as-cran` via `tools/cran-check.sh`
 - Ubuntu 24.04, R 4.6.1, `R CMD check --as-cran`: system Jansson 2.14
   and bundled 2.15.1
+- valgrind over the full test suite, bundled Jansson: 0 errors, no
+  bytes lost
 
-Checked on 0.1.1 (unchanged code): Rocker R 4.4.3 (the declared R
-floor); GitHub Actions ubuntu-latest and macos-latest with and without
-a system Jansson, plus a leg linking Jansson 2.11 from source; Windows
-R 4.6.0 and R-devel with Rtools45; win-builder release and devel.
+Checked on 0.1.1 and 0.1.2 (identical apart from the changes above):
+Rocker R 4.4.3 (the declared R floor); GitHub Actions ubuntu-latest and
+macos-latest with and without a system Jansson, plus a leg linking
+Jansson 2.11 from source; Windows R 4.6.0 and R-devel with Rtools45;
+win-builder release and devel.
 
 ## R CMD check results
 
 0 errors | 0 warnings | 1 note
 
-- New submission.
+- Days since last update: the update comes shortly after 0.1.2 because
+  it answers CRAN's gcc-UBSAN report on that version.
 
 ## System requirements
 

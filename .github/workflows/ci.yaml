@@ -172,6 +172,20 @@ jobs:
       - name: as-cran check, bundled Jansson, newest gcc
         run: SRC="$PWD" bash tools/cran-check.sh
 
+  # CRAN's gcc-UBSAN check compiles the bundled Jansson with
+  # -fsanitize=undefined,bounds-strict and reads the sanitizer's output
+  # from the examples and tests. 0.1.2 was reported for a one-element
+  # array struct hack that only bounds-strict flags, so mirror that
+  # check and fail on any sanitizer report.
+  ubsan:
+    runs-on: ubuntu-latest
+    container: rocker/r-devel:latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: UBSAN check, bundled Jansson, newest gcc
+        run: SRC="$PWD" bash tools/ubsan-check.sh
+
   # Prove the declared jansson >= 2.11 floor with the real 2.11 library:
   # mapping and ownership behavior, not just symbol existence.
   floor:

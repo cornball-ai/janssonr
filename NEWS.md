@@ -1,3 +1,31 @@
+# janssonr 0.1.3
+
+Fixes the finding from CRAN's gcc-UBSAN check of 0.1.2 (published
+2026-09-12): `jansson/hashtable.c:217: index 1 out of bounds for type
+'char [1]'` on the first object parsed. Both changes are in the bundled
+Jansson sources, which compile only when no system Jansson is found.
+
+- `struct hashtable_pair` in the bundled `hashtable.h` and `struct
+  Bigint` in the bundled `dtoa.c` declare their trailing, variably
+  sized member as a C99 flexible array member (`char key[]`,
+  `ULong x[]`) instead of a one-element array. The one-element form is
+  the pre-C99 "struct hack": every allocation was already sized for the
+  real length, so layout and behavior are unchanged, but indexing past
+  element 0 of a `char [1]` is out of bounds for the declared type, and
+  gcc's `-fsanitize=bounds-strict`, which CRAN's UBSAN check uses,
+  reports it. The `dtoa.c` instance had not been reported yet because
+  dtoa's 64-bit fast path handles nearly every double; shortest-form
+  encoding of some whole-number doubles above 2^53 (29006543789128832
+  is one) falls back to its multi-word arithmetic and trips the same
+  check. `Balloc()`'s size arithmetic follows the new `sizeof`.
+- `test_roundtrip.R` now encodes whole-number doubles above 2^53 that
+  take that fallback path, so sanitizer runs exercise it.
+- New `tools/ubsan-check.sh` reproduces CRAN's gcc-UBSAN configuration:
+  the bundled Jansson compiled with `-fsanitize=undefined,bounds-strict`,
+  then `R CMD check`, failing on any sanitizer report in the example or
+  test output. CI runs it in the Debian R-devel container next to the
+  existing `tools/cran-check.sh` gate.
+
 # janssonr 0.1.2
 
 Resubmission after CRAN's review of 0.1.1. DESCRIPTION only; no code
